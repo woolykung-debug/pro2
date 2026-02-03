@@ -286,55 +286,64 @@
      renderPendingTable();
     }
 
- // ส่งข้อมูลทั้งหมดไปบันทึกทีเดียว
+// ฟังก์ชันบันทึกรับเข้า (แบบใหม่: ถามชื่อคนรับของ)
     function saveBatchStock() {
-     if (pendingItems.length === 0) return;
+        // 1. ถ้าไม่มีรายการให้หยุดทำงาน
+        if (pendingItems.length === 0) return;
 
-    Swal.fire({
-        title: 'ยืนยันบันทึก?',
-        text: `ต้องการบันทึกสินค้าจำนวน ${pendingItems.length} รายการ?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'บันทึกเลย'
-     }).then((result) => {
-        if (result.isConfirmed) {
-            
-            // ส่ง AJAX ไปหา api_receive_batch.php
-            fetch('api_receive_batch.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(pendingItems),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status == 'success') {
-                    Swal.fire('สำเร็จ', data.msg, 'success');
-                    pendingItems = []; // เคลียร์คิว
-                    renderPendingTable();
-                    $("#proTable").load(location.href + " #proTable"); // รีโหลดตารางหลัก
-                } else if (data.status == 'partial_error') {
-                    // กรณีมีบางตัว Error
-                    let errorMsg = data.errors.join('<br>');
-                    Swal.fire({
-                        title: 'บันทึกเสร็จสิ้น (แต่มีข้อผิดพลาด)',
-                        html: errorMsg,
-                        icon: 'warning'
-                    });
-                    pendingItems = []; 
-                    renderPendingTable();
-                    $("#proTable").load(location.href + " #proTable");
-                } else {
-                    Swal.fire('Error', data.msg, 'error');
+        // 2. เด้งหน้าต่างถามชื่อ
+        Swal.fire({
+            title: 'ยืนยันการรับเข้า',
+            html: 'กรุณาระบุชื่อผู้รับของ:<br><input id="swal_operator" class="swal2-input" placeholder="ระบุชื่อผู้รับสินค้า...">',
+            showCancelButton: true,
+            confirmButtonText: 'บันทึก',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 3. ดึงชื่อที่กรอกออกมา
+                let operator = document.getElementById('swal_operator').value;
+                
+                // 4. ถ้าไม่กรอกชื่อ ให้แจ้งเตือนและหยุด
+                if(!operator) { 
+                    Swal.fire('แจ้งเตือน', 'กรุณาระบุชื่อผู้รับของก่อนบันทึก', 'warning'); 
+                    return; 
                 }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
-            });
-        }
-     });
+
+                // 5. เอาชื่อใส่เข้าไปในทุกรายการสินค้าที่จะบันทึก
+                let payload = pendingItems.map(item => ({...item, operator: operator}));
+
+                // 6. ส่งข้อมูลไปที่ Server
+                fetch('api_receive_batch.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status == 'success') {
+                        Swal.fire('สำเร็จ', data.msg, 'success');
+                        pendingItems = []; // เคลียร์รายการ
+                        renderPendingTable();
+                        $("#proTable").load(location.href + " #proTable"); // รีโหลดตาราง
+                    } else if (data.status == 'partial_error') {
+                        Swal.fire({
+                            title: 'บันทึกเสร็จสิ้น (แต่มีข้อผิดพลาด)',
+                            html: data.errors.join('<br>'),
+                            icon: 'warning'
+                        });
+                        pendingItems = []; 
+                        renderPendingTable();
+                        $("#proTable").load(location.href + " #proTable");
+                    } else {
+                        Swal.fire('Error', data.msg, 'error');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                });
+            }
+        });
     }
 
      /*function addStock() {

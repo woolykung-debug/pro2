@@ -15,6 +15,7 @@ $errors = [];
 foreach ($items as $item) {
     $barcode = $item['barcode'];
     $sn = $item['sn'];
+    $operator = $item['operator']; // <--- รับชื่อคนทำรายการ
 
     // 1. เช็คซ้ำ
     $check = $conn->query("SELECT * FROM product_serials WHERE serial_number = '$sn'");
@@ -30,8 +31,10 @@ foreach ($items as $item) {
         // 3. เพิ่มสต็อก
         $conn->query("UPDATE products SET quantity = quantity + 1 WHERE barcode = '$barcode'");
         
-        // 4. [สำคัญ!] บันทึกประวัติ (รับเข้า)
-        $conn->query("INSERT INTO product_history (serial_number, action_type, note) VALUES ('$sn', 'import', 'รับสินค้าเข้าใหม่')");
+        // 4. บันทึกประวัติ (พร้อมชื่อผู้ทำรายการ)
+        $sql_hist = "INSERT INTO product_history (serial_number, action_type, note, operator) 
+                     VALUES ('$sn', 'import', 'รับสินค้าเข้าใหม่', '$operator')";
+        $conn->query($sql_hist);
         
         $success_count++;
     } else {

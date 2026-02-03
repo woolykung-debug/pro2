@@ -309,32 +309,27 @@ $is_closed = ($proj['status'] == 'Closed');
     }
 
     // ฟังก์ชันคืนสินค้า
-    function returnItem(sn) {
+function returnItem(sn) {
         Swal.fire({
-            title: 'ยืนยันคืนสินค้า?',
-            text: "ระบุสาเหตุหรือหมายเหตุ (ถ้ามี)",
-            input: 'text',
-            inputPlaceholder: 'เช่น ของเหลือจากหน้างาน, เปลี่ยนตัวใหม่...',
-            icon: 'warning',
+            title: 'รับคืนสินค้า',
+            html: 
+                '<input id="swal_return_name" class="swal2-input" placeholder="ชื่อผู้คืนของ">' +
+                '<input id="swal_return_note" class="swal2-input" placeholder="หมายเหตุ (เช่น เหลือใช้, เสีย)">',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'คืนสินค้า',
-            cancelButtonText: 'ยกเลิก'
+            confirmButtonText: 'คืนสินค้า'
         }).then((result) => {
             if (result.isConfirmed) {
-                let note = result.value; 
+                let name = document.getElementById('swal_return_name').value;
+                let note = document.getElementById('swal_return_note').value;
+                
+                if(!name) { Swal.fire('แจ้งเตือน', 'ต้องระบุชื่อผู้คืน', 'warning'); return; }
 
-                $.post("api_return_item.php", { sn: sn, note: note }, function(res){
-                    try {
-                        let data = JSON.parse(res);
-                        if(data.status == 'success') {
-                             Swal.fire('สำเร็จ', 'คืนสินค้าเรียบร้อย', 'success').then(() => location.reload());
-                        } else {
-                            Swal.fire('Error', data.msg, 'error');
-                        }
-                    } catch(e) {
-                        console.log(res);
-                        Swal.fire('Error', 'เกิดข้อผิดพลาดจาก Server', 'error');
+                $.post("api_return_item.php", { sn: sn, note: note, operator: name }, function(res){
+                    let data = JSON.parse(res);
+                    if(data.status == 'success') {
+                        Swal.fire('สำเร็จ', 'คืนเรียบร้อย', 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.msg, 'error');
                     }
                 });
             }

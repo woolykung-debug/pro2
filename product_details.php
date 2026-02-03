@@ -54,21 +54,17 @@ $serials = $conn->query($sql_sn);
 
     <div class="card card-custom mb-4">
         <div class="card-body p-4 d-flex justify-content-between align-items-center">
-    <div>
-        <h4 class="fw-bold text-primary mb-1"><?php echo $product['name']; ?></h4>
-        <span class="badge bg-secondary fs-6 fw-normal">SKU: <?php echo $product['barcode']; ?></span>
-        <span class="badge bg-info text-dark fs-6 fw-normal">หน่วย: <?php echo $product['unit']; ?></span>
-        
-        <div class="mt-2 text-muted small">
-    <span class="me-3">
-        <i class="fas fa-tags me-1"></i> ประเภท: <?php echo $product['type_name']; ?></span>
-    
-    <span>
-        <i class="fas fa-store me-1"></i> Supplier: <?php echo $product['supplier_name']; ?></span>
-</div>
-
-    </div>
-    <div class="text-end">
+            <div>
+                <h4 class="fw-bold text-primary mb-1"><?php echo $product['name']; ?></h4>
+                <span class="badge bg-secondary fs-6 fw-normal">SKU: <?php echo $product['barcode']; ?></span>
+                <span class="badge bg-info text-dark fs-6 fw-normal">หน่วย: <?php echo $product['unit']; ?></span>
+                
+                <div class="mt-2 text-muted small">
+                    <span class="me-3"><i class="fas fa-tags me-1"></i> ประเภท: <?php echo $product['type_name']; ?></span>
+                    <span><i class="fas fa-store me-1"></i> Supplier: <?php echo $product['supplier_name']; ?></span>
+                </div>
+            </div>
+            <div class="text-end">
                 <h3 class="fw-bold mb-0"><?php echo number_format($product['price_sell'], 2); ?> <small class="fs-6 text-muted">บาท</small></h3>
                 <button class="btn btn-warning btn-sm mt-2 fw-bold px-3 rounded-pill" onclick="openEditModal()">
                     <i class="fas fa-pen me-1"></i> แก้ไขข้อมูลสินค้า
@@ -105,9 +101,15 @@ $serials = $conn->query($sql_sn);
                     ?>
                     <tr>
                         <td class="fw-bold"><?php echo $sn['serial_number']; ?></td>
-                        <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($sn['date_added'])); ?></td> <td class="text-center"><?php echo $status_badge; ?></td>
+                        <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($sn['date_added'])); ?></td> 
+                        <td class="text-center"><?php echo $status_badge; ?></td>
                         <td><?php echo $loc; ?></td>
                         <td class="text-center">
+                            
+                            <a href="history_view.php?sn=<?php echo $sn['serial_number']; ?>" target="_blank" class="btn btn-sm btn-info text-white me-1">
+                                <i class="fas fa-history"></i> ประวัติ
+                            </a>
+
                             <?php if($sn['status'] == 'available'): ?>
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteSN(<?php echo $sn['id']; ?>, '<?php echo $sn['serial_number']; ?>')">
                                 <i class="fas fa-trash"></i> ลบ
@@ -115,6 +117,7 @@ $serials = $conn->query($sql_sn);
                             <?php else: ?>
                             <button class="btn btn-sm btn-light text-muted" disabled><i class="fas fa-lock"></i></button>
                             <?php endif; ?>
+                            
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -132,28 +135,32 @@ $serials = $conn->query($sql_sn);
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-    <input type="hidden" id="edit_id" value="<?php echo $product['id']; ?>">
-    <div class="mb-3">
-        <label>ชื่อสินค้า</label>
-        <input type="text" id="edit_name" class="form-control" value="<?php echo $product['name']; ?>"></div>
-
-    <div class="row mb-3">
-        <div class="col"><label>ประเภทสินค้า</label>
-            <input type="text" id="edit_type" class="form-control" value="<?php echo $product['product_type']; ?>"></div>
-        <div class="col"><label>Supplier</label>
-            <input type="text" id="edit_supplier" class="form-control" value="<?php echo $product['supplier']; ?>">
-        </div>
-    </div>
-    <div class="row">
-        <div class="col"><label>ราคาซื้อ</label>
-            <input type="number" id="edit_price" class="form-control" value="<?php echo $product['price_sell']; ?>">
-        </div>
-        <div class="col">
-            <label>หน่วยนับ</label>
-            <input type="text" id="edit_unit" class="form-control" value="<?php echo $product['unit']; ?>">
-        </div>
-    </div>
-</div>
+                <input type="hidden" id="edit_id" value="<?php echo $product['id']; ?>">
+                <div class="mb-3">
+                    <label>ชื่อสินค้า</label>
+                    <input type="text" id="edit_name" class="form-control" value="<?php echo $product['name']; ?>">
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label>ประเภทสินค้า</label>
+                        <input type="text" id="edit_type" class="form-control" value="<?php echo $product['product_type']; ?>">
+                    </div>
+                    <div class="col">
+                        <label>Supplier</label>
+                        <input type="text" id="edit_supplier" class="form-control" value="<?php echo $product['supplier']; ?>">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label>ราคาซื้อ</label>
+                        <input type="number" id="edit_price" class="form-control" value="<?php echo $product['price_sell']; ?>">
+                    </div>
+                    <div class="col">
+                        <label>หน่วยนับ</label>
+                        <input type="text" id="edit_unit" class="form-control" value="<?php echo $product['unit']; ?>">
+                    </div>
+                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="saveEdit()">บันทึก</button>
             </div>
@@ -177,24 +184,21 @@ $serials = $conn->query($sql_sn);
     }
 
     function saveEdit(){
-    $.post("update_item.php", {
-        id: $('#edit_id').val(),
-        name: $('#edit_name').val(),
-        
-        // เพิ่ม 2 ค่านี้
-        type: $('#edit_type').val(), 
-        supplier: $('#edit_supplier').val(),
-        
-        price: $('#edit_price').val(),
-        unit: $('#edit_unit').val()
-    }, function(res){
-        if(res.trim() == 'success') {
-            Swal.fire('สำเร็จ', 'บันทึกข้อมูลแล้ว', 'success').then(() => location.reload());
-        } else {
-            Swal.fire('Error', res, 'error');
-        }
-    });
-}
+        $.post("update_item.php", {
+            id: $('#edit_id').val(),
+            name: $('#edit_name').val(),
+            type: $('#edit_type').val(), 
+            supplier: $('#edit_supplier').val(),
+            price: $('#edit_price').val(),
+            unit: $('#edit_unit').val()
+        }, function(res){
+            if(res.trim() == 'success') {
+                Swal.fire('สำเร็จ', 'บันทึกข้อมูลแล้ว', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', res, 'error');
+            }
+        });
+    }
 
     function deleteSN(id, sn) {
         Swal.fire({

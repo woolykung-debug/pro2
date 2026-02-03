@@ -1,5 +1,4 @@
 <?php
-// หาชื่อไฟล์ปัจจุบัน เช่น "index.php", "projects.php"
 $page = basename($_SERVER['PHP_SELF']);
 ?>
 
@@ -17,6 +16,9 @@ $page = basename($_SERVER['PHP_SELF']);
         <a class="nav-link <?php echo ($page == 'products.php' || $page == 'product_details.php') ? 'active' : ''; ?>" href="products.php">
             <i class="fas fa-boxes"></i> สินค้าทั้งหมด (รายงาน)
         </a>
-</div>
+
+        <a class="nav-link <?php echo ($page == 'history_log.php') ? 'active' : ''; ?>" href="history_log.php">
+            <i class="fas fa-history"></i> ประวัติเข้า-ออก
+        </a>
     </nav>
 </div>
