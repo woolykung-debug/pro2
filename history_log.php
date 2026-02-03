@@ -30,10 +30,10 @@ $filter_type = isset($_GET['type']) ? $_GET['type'] : '';
         .header-select {
             background-color: transparent;
             border: none;
-            font-weight: bold; /* ให้ตัวหนาเหมือนหัวข้ออื่น */
+            font-weight: bold;
             text-align: center;
             cursor: pointer;
-            color: var(--bs-table-color); /* สีเดียวกับตัวหนังสือหัวตาราง */
+            color: var(--bs-table-color);
             width: 100%;
             padding: 0;
         }
@@ -60,17 +60,17 @@ $filter_type = isset($_GET['type']) ? $_GET['type'] : '';
                         
                         <th width="12%" class="text-center p-0 align-middle">
                             <select class="form-select form-select-sm header-select" onchange="location.href='?type='+this.value">
-                                <option value="" <?php echo $filter_type == '' ? 'selected' : ''; ?>>▼ ทุกประเภท</option>
-                                <option value="import" <?php echo $filter_type == 'import' ? 'selected' : ''; ?>>🔵 รับเข้า</option>
-                                <option value="export" <?php echo $filter_type == 'export' ? 'selected' : ''; ?>>🔴 เบิกออก</option>
-                                <option value="return" <?php echo $filter_type == 'return' ? 'selected' : ''; ?>>🟡 รับคืน</option>
+                                <option value="" <?php echo $filter_type == '' ? 'selected' : ''; ?>>ทุกประเภท</option>
+                                <option value="import" <?php echo $filter_type == 'import' ? 'selected' : ''; ?>>รับเข้า</option>
+                                <option value="export" <?php echo $filter_type == 'export' ? 'selected' : ''; ?>>เบิกออก</option>
+                                <option value="return" <?php echo $filter_type == 'return' ? 'selected' : ''; ?>>รับคืน</option>
                             </select>
                         </th>
 
                         <th width="15%">ผู้ทำรายการ</th>
                         <th width="15%">S/N</th>
-                        <th width="20%">สินค้า / โครงการ</th>
-                        <th>หมายเหตุ (แก้ไขได้)</th>
+                        <th width="20%">ชื่อสินค้า & ที่อยู่</th>
+                        <th width="23%">หมายเหตุ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,8 +96,13 @@ $filter_type = isset($_GET['type']) ? $_GET['type'] : '';
                         elseif($row['action_type'] == 'export') $badge = '<span class="badge bg-danger rounded-pill px-3">เบิกออก</span>';
                         elseif($row['action_type'] == 'return') $badge = '<span class="badge bg-warning text-dark rounded-pill px-3">รับคืน</span>';
                         
-                        $pro_name = $row['product_name'] ? $row['product_name'] : '<span class="text-muted small">-</span>';
-                        $location = $row['project_name'] ? '<i class="fas fa-folder text-warning"></i> '.$row['project_name'] : $pro_name;
+                        $pro_name = $row['product_name'] ? $row['product_name'] : '<span class="text-muted small">- ไม่พบชื่อสินค้า -</span>';
+                        
+                        $project_info = '';
+                        if($row['project_name']) {
+                            $project_info = '<div class="small text-muted mt-1"><i class="fas fa-folder text-warning me-1"></i>'.$row['project_name'].'</div>';
+                        }
+                        
                         $operator = $row['operator'] ? '<i class="fas fa-user-circle text-secondary me-1"></i> '.$row['operator'] : '-';
                     ?>
                     <tr>
@@ -105,11 +110,18 @@ $filter_type = isset($_GET['type']) ? $_GET['type'] : '';
                         <td class="text-center"><?php echo $badge; ?></td>
                         <td><?php echo $operator; ?></td>
                         <td class="fw-bold text-primary"><?php echo $row['serial_number']; ?></td>
-                        <td><small><?php echo $location; ?></small></td>
+                        
+                        <td>
+                            <div class="fw-bold text-dark"><?php echo $pro_name; ?></div>
+                            <?php echo $project_info; ?>
+                        </td>
+
                         <td>
                             <div class="d-flex justify-content-between align-items-center">
-                                <span id="note_<?php echo $row['id']; ?>" class="text-muted small fst-italic"><?php echo $row['note']; ?></span>
-                                <i class="fas fa-pen btn-edit-note ms-2" onclick="editNote(<?php echo $row['id']; ?>, '<?php echo $row['note']; ?>')"></i>
+                                <div style="max-width: 250px;" class="text-truncate text-muted small fst-italic" title="<?php echo htmlspecialchars($row['note']); ?>">
+                                    <span id="note_<?php echo $row['id']; ?>"><?php echo $row['note']; ?></span>
+                                </div>
+                                <i class="fas fa-pen btn-edit-note ms-2" style="flex-shrink: 0;" onclick="editNote(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['note'], ENT_QUOTES); ?>')"></i>
                             </div>
                         </td>
                     </tr>
@@ -132,7 +144,7 @@ $filter_type = isset($_GET['type']) ? $_GET['type'] : '';
             "language": { "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/th.json" },
             "order": [[ 0, "desc" ]], 
             "columnDefs": [
-                { "orderable": false, "targets": [1, 2, 3, 4, 5] } // ห้ามเรียงลำดับ column 1,2,3,4,5
+                { "orderable": false, "targets": [1, 2, 3, 4, 5] } 
             ]
         });
     });
@@ -140,7 +152,10 @@ $filter_type = isset($_GET['type']) ? $_GET['type'] : '';
     function editNote(id, oldNote) {
         Swal.fire({
             title: 'แก้ไขหมายเหตุ',
-            input: 'text',
+            input: 'textarea', // [✨] เปลี่ยนเป็น textarea
+            inputAttributes: {
+                'style': 'height: 150px; font-size: 1rem;' // [✨] กำหนดความสูงให้ใหญ่ขึ้น
+            },
             inputValue: oldNote,
             showCancelButton: true,
             confirmButtonText: 'บันทึก',

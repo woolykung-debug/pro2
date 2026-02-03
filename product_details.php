@@ -92,7 +92,7 @@ $serials = $conn->query($sql_sn);
                     <?php while($sn = $serials->fetch_assoc()): 
                         // จัดการสีสถานะ
                         if($sn['status'] == 'available') {
-                            $status_badge = '<span class="badge bg-success">ว่าง / พร้อมขาย</span>';
+                            $status_badge = '<span class="badge bg-success">พร้อมใช้</span>';
                             $loc = '<span class="text-muted">- คลังสินค้า -</span>';
                         } else {
                             $status_badge = '<span class="badge bg-danger">ถูกเบิกแล้ว</span>';
@@ -106,10 +106,6 @@ $serials = $conn->query($sql_sn);
                         <td><?php echo $loc; ?></td>
                         <td class="text-center">
                             
-                            <a href="history_view.php?sn=<?php echo $sn['serial_number']; ?>" target="_blank" class="btn btn-sm btn-info text-white me-1">
-                                <i class="fas fa-history"></i> ประวัติ
-                            </a>
-
                             <?php if($sn['status'] == 'available'): ?>
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteSN(<?php echo $sn['id']; ?>, '<?php echo $sn['serial_number']; ?>')">
                                 <i class="fas fa-trash"></i> ลบ
